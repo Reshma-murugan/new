@@ -7,10 +7,50 @@ const TodoItem = ({ todo, onToggle, onUpdate, onDelete }) => {
   const [editDueDate, setEditDueDate] = useState(
     todo.dueDate ? new Date(todo.dueDate).toISOString().slice(0, 16) : ''
   );
+  const [isUpdating, setIsUpdating] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
 
-  const handleSave = () => {
-    if (editText.trim()) {
-      onUpdate(todo.id, editText.trim(), editDueDate || null);
+  const handleSave = async () => {
+    if (editText.trim() && !isUpdating) {
+      setIsUpdating(true);
+      try {
+        await onUpdate(todo.id, editText.trim(), editDueDate || null);
+        setIsEditing(false);
+      } catch (error) {
+        console.error('Error updating todo:', error);
+      } finally {
+        setIsUpdating(false);
+      }
+    }
+  };
+
+  const handleToggle = async () => {
+    if (!isUpdating) {
+      setIsUpdating(true);
+      try {
+        await onToggle();
+      } catch (error) {
+        console.error('Error toggling todo:', error);
+      } finally {
+        setIsUpdating(false);
+      }
+    }
+  };
+
+  const handleDelete = async () => {
+    if (!isDeleting) {
+      setIsDeleting(true);
+      try {
+        await onDelete();
+      } catch (error) {
+        console.error('Error deleting todo:', error);
+        setIsDeleting(false);
+      }
+    }
+  };
+
+  const startEditing = () => {
+    if (!isUpdating && !isDeleting) {
       setIsEditing(false);
     }
   };
@@ -27,6 +67,14 @@ const TodoItem = ({ todo, onToggle, onUpdate, onDelete }) => {
     } else if (e.key === 'Escape') {
       handleCancel();
     }
+  };
+
+  const handleTextChange = (e) => {
+    setEditText(e.target.value);
+  };
+
+  const handleDateChange = (e) => {
+    setEditDueDate(e.target.value);
   };
 
   const isOverdue = () => {
@@ -62,15 +110,18 @@ const TodoItem = ({ todo, onToggle, onUpdate, onDelete }) => {
     }
   };
 
+  const isFormDisabled = isUpdating || isDeleting;
+
   return (
-    <div className={`todo-item ${todo.completed ? 'completed' : ''} ${isOverdue() ? 'overdue' : ''} ${isDueToday() ? 'due-today' : ''}`}>
+    <div className={`todo-item ${todo.completed ? 'completed' : ''} ${isOverdue() ? 'overdue' : ''} ${isDueToday() ? 'due-today' : ''} ${isFormDisabled ? 'updating' : ''}`}>
       <div className="todo-content">
         <button
           className="toggle-btn"
-          onClick={onToggle}
+          onClick={handleToggle}
           aria-label={todo.completed ? 'Mark as incomplete' : 'Mark as complete'}
+          disabled={isFormDisabled}
         >
-          {todo.completed ? '✓' : '○'}
+          {isUpdating ? '⟳' : (todo.completed ? '✓' : '○')}
         </button>
 
         {isEditing ? (
@@ -78,21 +129,36 @@ const TodoItem = ({ todo, onToggle, onUpdate, onDelete }) => {
             <input
               type="text"
               value={editText}
-              onChange={(e) => setEditText(e.target.value)}
+              onChange={handleTextChange}
               onKeyDown={handleKeyPress}
               className="edit-input"
               autoFocus
+              disabled={isFormDisabled}
+              maxLength={255}
             />
             <input
               type="datetime-local"
               value={editDueDate}
-              onChange={(e) => setEditDueDate(e.target.value)}
+              onChange={handleDateChange}
               className="edit-date-input"
               min={new Date().toISOString().slice(0, 16)}
+              disabled={isFormDisabled}
             />
             <div className="edit-actions">
-              <button onClick={handleSave} className="save-btn">Save</button>
-              <button onClick={handleCancel} className="cancel-btn">Cancel</button>
+              <button 
+                onClick={handleSave} 
+                className="save-btn"
+                disabled={isFormDisabled || !editText.trim()}
+              >
+                {isUpdating ? 'Saving...' : 'Save'}
+              </button>
+              <button 
+                onClick={handleCancel} 
+                className="cancel-btn"
+                disabled={isFormDisabled}
+              >
+                Cancel
+              </button>
             </div>
           </div>
         ) : (
@@ -110,18 +176,20 @@ const TodoItem = ({ todo, onToggle, onUpdate, onDelete }) => {
       {!isEditing && (
         <div className="todo-actions">
           <button
-            onClick={() => setIsEditing(true)}
+            onClick={startEditing}
             className="edit-btn"
             aria-label="Edit todo"
+            disabled={isFormDisabled}
           >
             ✏️
           </button>
           <button
-            onClick={onDelete}
+            onClick={handleDelete}
             className="delete-btn"
             aria-label="Delete todo"
+            disabled={isFormDisabled}
           >
-            🗑️
+            {isDeleting ? '⟳' : '🗑️'}
           </button>
         </div>
       )}

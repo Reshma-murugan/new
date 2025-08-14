@@ -9,6 +9,7 @@ const TodoApp = () => {
   const [todos, setTodos] = useState([]);
   const [filter, setFilter] = useState('all');
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
   const { get, post, put, delete: deleteTodo } = useFetch();
 
   // Load todos on component mount
@@ -19,10 +20,12 @@ const TodoApp = () => {
   const loadTodos = async () => {
     try {
       setLoading(true);
+      setError(null);
       const data = await get('/todos');
       setTodos(data || []);
     } catch (error) {
       console.error('Error loading todos:', error);
+      setError('Failed to load todos. Please try again.');
       setTodos([]);
     } finally {
       setLoading(false);
@@ -31,6 +34,7 @@ const TodoApp = () => {
 
   const addTodo = async (text, dueDate = null) => {
     try {
+      setError(null);
       const newTodo = {
         text,
         completed: false,
@@ -41,11 +45,13 @@ const TodoApp = () => {
       setTodos(prevTodos => [...prevTodos, savedTodo]);
     } catch (error) {
       console.error('Error adding todo:', error);
+      setError('Failed to add todo. Please try again.');
     }
   };
 
   const toggleTodo = async (id) => {
     try {
+      setError(null);
       const todo = todos.find(t => t.id === id);
       if (!todo) return;
 
@@ -60,11 +66,13 @@ const TodoApp = () => {
       );
     } catch (error) {
       console.error('Error toggling todo:', error);
+      setError('Failed to update todo. Please try again.');
     }
   };
 
   const updateTodo = async (id, text, dueDate = null) => {
     try {
+      setError(null);
       const todo = todos.find(t => t.id === id);
       if (!todo) return;
 
@@ -80,24 +88,29 @@ const TodoApp = () => {
       );
     } catch (error) {
       console.error('Error updating todo:', error);
+      setError('Failed to update todo. Please try again.');
     }
   };
 
   const deleteTodoItem = async (id) => {
     try {
+      setError(null);
       await deleteTodo(`/todos/${id}`);
       setTodos(prevTodos => prevTodos.filter(t => t.id !== id));
     } catch (error) {
       console.error('Error deleting todo:', error);
+      setError('Failed to delete todo. Please try again.');
     }
   };
 
   const clearCompleted = async () => {
     try {
+      setError(null);
       await deleteTodo('/todos/clear-completed');
       setTodos(prevTodos => prevTodos.filter(todo => !todo.completed));
     } catch (error) {
       console.error('Error clearing completed todos:', error);
+      setError('Failed to clear completed todos. Please try again.');
     }
   };
 
@@ -136,6 +149,13 @@ const TodoApp = () => {
       
       <main className="main-content">
         <div className="todo-container">
+          {error && (
+            <div className="error-banner">
+              <p>{error}</p>
+              <button onClick={() => setError(null)} className="error-dismiss">×</button>
+            </div>
+          )}
+          
           <TodoInput onAddTodo={addTodo} />
           <TodoList
             todos={getFilteredTodos()}

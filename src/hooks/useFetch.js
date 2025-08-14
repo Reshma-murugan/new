@@ -1,8 +1,10 @@
 import { useState, useCallback } from 'react';
+import { useAuth } from '../context/AuthContext';
 
 const API_BASE_URL = 'http://localhost:8080/api';
 
 export const useFetch = () => {
+  const { logout } = useAuth();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
 
@@ -25,7 +27,7 @@ export const useFetch = () => {
         // Token expired or invalid
         localStorage.removeItem('token');
         localStorage.removeItem('user');
-        window.location.href = '/login';
+        logout();
         throw new Error('Authentication failed');
       }
       
@@ -56,14 +58,14 @@ export const useFetch = () => {
       });
       
       const data = await handleResponse(response);
-      setLoading(false);
       return data;
     } catch (err) {
       setError(err.message);
-      setLoading(false);
       throw err;
+    } finally {
+      setLoading(false);
     }
-  }, []);
+  }, [logout]);
 
   const get = useCallback((url) => {
     return fetchData(url, { method: 'GET' });

@@ -1,4 +1,5 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 
 const AuthContext = createContext();
 
@@ -21,12 +22,44 @@ export const AuthProvider = ({ children }) => {
     const storedUser = localStorage.getItem('user');
     
     if (storedToken && storedUser) {
-      setToken(storedToken);
-      setUser(JSON.parse(storedUser));
+      try {
+        setToken(storedToken);
+        setUser(JSON.parse(storedUser));
+      } catch (error) {
+        console.error('Error parsing stored user data:', error);
+        localStorage.removeItem('token');
+        localStorage.removeItem('user');
+      }
     }
     
     setLoading(false);
   }, []);
+
+  // Auto-logout on token expiry
+  useEffect(() => {
+    if (token) {
+      try {
+        const payload = JSON.parse(atob(token.split('.')[1]));
+        const expiryTime = payload.exp * 1000;
+        const currentTime = Date.now();
+        
+        if (expiryTime <= currentTime) {
+          logout();
+          return;
+        }
+        
+        const timeUntilExpiry = expiryTime - currentTime;
+        const timeoutId = setTimeout(() => {
+          logout();
+        }, timeUntilExpiry);
+        
+        return () => clearTimeout(timeoutId);
+      } catch (error) {
+        console.error('Error parsing token:', error);
+        logout();
+      }
+    }
+  }, [token]);
 
   const login = (userData, authToken) => {
     setUser(userData);
@@ -40,8 +73,6 @@ export const AuthProvider = ({ children }) => {
     setToken(null);
     localStorage.removeItem('token');
     localStorage.removeItem('user');
-    // Force redirect to login
-    window.location.href = '/login';
   };
 
   const isAuthenticated = () => {

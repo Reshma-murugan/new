@@ -31,6 +31,20 @@
   background: linear-gradient(135deg, #fff 0%, #feebc8 100%);
 }
 
+.todo-item.updating {
+  opacity: 0.7;
+  pointer-events: none;
+}
+
+.todo-item.updating .toggle-btn {
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
 .todo-content {
   display: flex;
   align-items: flex-start;
@@ -59,6 +73,11 @@
 .toggle-btn:hover {
   border-color: #48bb78;
   background: rgba(72, 187, 120, 0.1);
+}
+
+.toggle-btn:disabled {
+  cursor: not-allowed;
+  opacity: 0.6;
 }
 
 .completed .toggle-btn {
@@ -130,6 +149,12 @@
   opacity: 1;
 }
 
+.edit-btn:disabled,
+.delete-btn:disabled {
+  cursor: not-allowed;
+  opacity: 0.3;
+}
+
 .edit-form {
   flex: 1;
   display: flex;
@@ -145,6 +170,12 @@
   background: white;
   color: #2d3748;
   outline: none;
+  transition: opacity 0.2s ease;
+}
+
+.edit-input:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
 }
 
 .edit-date-input {
@@ -154,11 +185,17 @@
   font-size: 12px;
   background: white;
   color: #2d3748;
+  transition: opacity 0.2s ease;
 }
 
 .edit-date-input:focus {
   outline: none;
   border-color: #667eea;
+}
+
+.edit-date-input:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
 }
 
 .edit-actions {
@@ -187,6 +224,12 @@
   transform: translateY(-1px);
 }
 
+.save-btn:disabled {
+  background: #a0aec0;
+  cursor: not-allowed;
+  transform: none;
+}
+
 .cancel-btn {
   background: #e2e8f0;
   color: #2d3748;
@@ -194,6 +237,11 @@
 
 .cancel-btn:hover {
   background: #cbd5e0;
+}
+
+.cancel-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
 }
 
 @media (max-width: 768px) {

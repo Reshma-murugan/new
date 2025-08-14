@@ -10,11 +10,13 @@ const Login = () => {
     password: '',
   });
   const [error, setError] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
   const { login } = useAuth();
   const navigate = useNavigate();
   const { post, loading } = useFetch();
 
   const handleChange = (e) => {
+    setError(''); // Clear error when user starts typing
     setFormData({
       ...formData,
       [e.target.name]: e.target.value,
@@ -27,6 +29,16 @@ const Login = () => {
 
     if (!formData.username || !formData.password) {
       setError('Please fill in all fields');
+      return;
+    }
+
+    if (formData.username.length < 3) {
+      setError('Username must be at least 3 characters long');
+      return;
+    }
+
+    if (formData.password.length < 6) {
+      setError('Password must be at least 6 characters long');
       return;
     }
 
@@ -47,6 +59,12 @@ const Login = () => {
     }
   };
 
+  const togglePasswordVisibility = () => {
+    setShowPassword(!showPassword);
+  };
+
+  const isFormValid = formData.username.trim().length >= 3 && formData.password.length >= 6;
+
   return (
     <div className="auth-container">
       <div className="auth-card">
@@ -66,26 +84,44 @@ const Login = () => {
               onChange={handleChange}
               placeholder="Enter your username"
               disabled={loading}
+              minLength={3}
+              maxLength={50}
+              autoComplete="username"
+              required
             />
           </div>
           
           <div className="form-group">
             <label htmlFor="password">Password</label>
-            <input
-              type="password"
-              id="password"
-              name="password"
-              value={formData.password}
-              onChange={handleChange}
-              placeholder="Enter your password"
-              disabled={loading}
-            />
+            <div className="password-input-wrapper">
+              <input
+                type={showPassword ? "text" : "password"}
+                id="password"
+                name="password"
+                value={formData.password}
+                onChange={handleChange}
+                placeholder="Enter your password"
+                disabled={loading}
+                minLength={6}
+                autoComplete="current-password"
+                required
+              />
+              <button
+                type="button"
+                className="password-toggle"
+                onClick={togglePasswordVisibility}
+                disabled={loading}
+                aria-label={showPassword ? "Hide password" : "Show password"}
+              >
+                {showPassword ? '👁️' : '👁️‍🗨️'}
+              </button>
+            </div>
           </div>
           
           <button 
             type="submit" 
             className="auth-button"
-            disabled={loading}
+            disabled={loading || !isFormValid}
           >
             {loading ? 'Signing in...' : 'Sign In'}
           </button>

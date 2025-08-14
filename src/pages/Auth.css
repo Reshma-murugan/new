@@ -81,6 +81,53 @@
   cursor: not-allowed;
 }
 
+.password-input-wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.password-input-wrapper input {
+  flex: 1;
+  padding-right: 40px;
+}
+
+.password-toggle {
+  position: absolute;
+  right: 12px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 16px;
+  color: #718096;
+  transition: color 0.2s ease;
+  padding: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+}
+
+.password-toggle:hover {
+  color: #2d3748;
+}
+
+.password-toggle:disabled {
+  cursor: not-allowed;
+  opacity: 0.5;
+}
+
+.password-requirements {
+  margin-top: 4px;
+}
+
+.password-requirements small {
+  color: #718096;
+  font-size: 12px;
+  line-height: 1.4;
+}
+
 .auth-button {
   background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
   color: white;
@@ -130,6 +177,7 @@
   border-radius: 8px;
   font-size: 14px;
   border: 1px solid #feb2b2;
+  animation: slideIn 0.3s ease-out;
 }
 
 .success-message {
@@ -139,6 +187,18 @@
   border-radius: 8px;
   font-size: 14px;
   border: 1px solid #9ae6b4;
+  animation: slideIn 0.3s ease-out;
+}
+
+@keyframes slideIn {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 .profile-info {
@@ -162,6 +222,38 @@
   box-shadow: 0 8px 25px rgba(229, 62, 62, 0.3);
 }
 
+.profile-header {
+  text-align: center;
+  margin-bottom: 32px;
+}
+
+.profile-avatar-large {
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 600;
+  font-size: 32px;
+  color: white;
+  margin: 0 auto 16px;
+  box-shadow: 0 4px 20px rgba(102, 126, 234, 0.3);
+}
+
+.profile-actions {
+  display: flex;
+  gap: 12px;
+  flex-direction: column;
+}
+
+.profile-actions .auth-button {
+  text-decoration: none;
+  text-align: center;
+  display: inline-block;
+}
+
 @media (max-width: 480px) {
   .auth-card {
     padding: 24px;
@@ -170,5 +262,19 @@
   
   .auth-title {
     font-size: 24px;
+  }
+  
+  .password-toggle {
+    right: 8px;
+  }
+  
+  .profile-avatar-large {
+    width: 60px;
+    height: 60px;
+    font-size: 24px;
+  }
+  
+  .profile-actions {
+    gap: 8px;
   }
 }
